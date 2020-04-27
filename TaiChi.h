@@ -1,3 +1,5 @@
+#include <cuda_runtime.h>
+#include "cusparse.h"
 
 //记录每个shape的基本信息
 typedef struct shape{
