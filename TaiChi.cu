@@ -796,6 +796,7 @@ int call_anonymouslib(int m, int n, int nnzA,
 	// checkCudaErrors(cudaMemcpy(d_csrValA,    csrValA,    nnzA  * sizeof(VALUE_TYPE),   cudaMemcpyHostToDevice));
     }
 	double transfer_time = transfer_timer.stop() / NUM_RUN;
+	cout << "CSR5_transfer="<<transfer_time<<endl;
 
 	// Vector x
 	checkCudaErrors(cudaMalloc((void **)&d_x, n * sizeof(VALUE_TYPE)));
