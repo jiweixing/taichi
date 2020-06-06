@@ -1,7 +1,7 @@
 #include <cuda_runtime.h>
 #include "cusparse.h"
 
-//记录每个shape的基本信息
+// record the basic info of each shape
 typedef struct shape{
 	int id;
 	char format[20];        // format for each submatrix
@@ -24,30 +24,29 @@ typedef struct shape{
 
 typedef struct TaiChi {
 	char shape; 	//	0-diagnal 1-ultra-sparse 2-triangle-or-rectangle
-	int M_sub;		// 子矩阵的行大小
-	int N_sub;		// 子矩阵的列大小
-	int xStart;		// 子矩阵的行初始值
-	int yStart;		// 子矩阵的列初始值
-	int width;		// 对角块的宽度
+	int M_sub;		// row length of submatrix
+	int N_sub;		// column length of submatrix
+	int xStart;		// row offset of submatrix
+	int yStart;		// column length of submatrix
+	int width;		// diagonal width
 		
-	// for diagnals
-	// 稠密对角线
-	int neg;				// 稠密对角线的数量
-	int maxNumZero;			// 稠密对角线的最大零元数量 
-	int *neg_offsets;		// 稠密对角线于主对角线的偏移量	
-	int *numZeroNeg;		// 每一个稠密对角线的零元数量
-	int **rowZeroNeg;		// 每一个稠密对角线中零元的行索引值
+	// for dense diagnals
+	int neg;				// number of dense diagonals
+	int maxNumZero;			// maximal number of zeros of dense diagonal 
+	int *neg_offsets;		// offset of dense diagonal	
+	int *numZeroNeg;		// number of zeros for each dense diagonal
+	int **rowZeroNeg;		// row index of zeros in each dense diagonal
 
 	int *start;
 	int *end;
 	int *cStart;
 
-	// 稀疏对角线
-	// int pos;				// 稀疏对角线的数量
-	// int maxNumNnz;			// 稀疏对角线的最大非零元数量
-	// int *pos_offsets;		// 稀疏对角线于主对角线的偏移量
-	// int *numNnzPos;			// 每一个稠密对角线的非零元数量
-	// int **rowNnzPos;		// 每一个稀疏对角线非零元的行索引值
+	// sparse diagonal
+	// int pos;				
+	// int maxNumNnz;			
+	// int *pos_offsets;		
+	// int *numNnzPos;			
+	// int **rowNnzPos;		
 
 	// for others
 	int nnz;

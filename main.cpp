@@ -26,7 +26,7 @@ float * yHostPtr = 0;
 int main(int argc, char *argv[]){
 	if (argc != 3)
 	{
-		printf("usage: ./exe MatrixPath sdfPath\n");
+		printf("usage: main MatrixPath sdfPath\n");
 		return 0;
 	}
 

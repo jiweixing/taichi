@@ -2,7 +2,7 @@ SUDO_GID=1000
 MAIL=/var/mail/USER
 LC_TIME=zh_CN.UTF-8
 USER=USER
-HOME=/home/gjh
+HOME=/home/user
 LC_MONETARY=zh_CN.UTF-8
 SUDO_UID=1000
 LOGNAME=USER
@@ -16,13 +16,13 @@ LS_COLORS=rs=0:di=01;34:ln=01;36:mh=00:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd
 SUDO_COMMAND=/bin/sh run.sh
 LC_NAME=zh_CN.UTF-8
 SHELL=/bin/bash
-SUDO_USER=gjh
+SUDO_USER=user
 LC_MEASUREMENT=zh_CN.UTF-8
 LC_IDENTIFICATION=zh_CN.UTF-8
-PWD=/home/gjh
+PWD=/home/user
 LC_NUMERIC=zh_CN.UTF-8
 LC_PAPER=zh_CN.UTF-8
-Linux gjh-Z97X-UD3H 4.4.0-139-generic #165~14.04.1-Ubuntu SMP Wed Oct 31 10:55:11 UTC 2018 x86_64 x86_64 x86_64 GNU/Linux
+Linux user-Z97X-UD3H 4.4.0-139-generic #165~14.04.1-Ubuntu SMP Wed Oct 31 10:55:11 UTC 2018 x86_64 x86_64 x86_64 GNU/Linux
 Architecture:          x86_64
 CPU op-mode(s):        32-bit, 64-bit
 Byte Order:            Little Endian

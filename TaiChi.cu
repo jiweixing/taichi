@@ -214,7 +214,7 @@ void cal_shape_size(int M, int N, int mF, int x1, int y1, int a1, int b1, int &x
 		b = (int)(b1 / gain);
 	}
 	else { // M == mF
-		gain = 1.0;   // 如果直接写成(float)M/(float)mF,可能会得到结果为inf
+		gain = 1.0; 
 		x = x1;
 		y = y1; 
 		a = a1;
@@ -233,7 +233,7 @@ void partition_shapes(FILE *fSdf, int M, int N, int nnz, int* &csrRowIndexHostPt
 		h[i].id = i;
 		if(fscanf(fSdf, "%s %d %d %d %d %d", &(h[i].category), &(h[i].x1), &(h[i].y1), &(h[i].a1), &(h[i].b1), &(h[i].area1)) != EOF)
 		{
-			h[i].x1--;	//x1是以one-based的，而x是以zero-based的
+			h[i].x1--;	// x1 is one-based, x is zero-based
 			h[i].y1--;
 			float gain;
 
@@ -243,7 +243,7 @@ void partition_shapes(FILE *fSdf, int M, int N, int nnz, int* &csrRowIndexHostPt
 				partition_dia_shape(M, N, nnz, csrRowIndexHostPtr, csrColIndexHostPtr, csrValHostPtr, gain, h[i], neg_format[i]);
 			} // end diagonal
 			else {
-				//矩形和三角形
+				// rectangle and triangle
 				printf("rectangle/triangle\n");
 				neg_format[i].neg = 0;
 				neg_format[i].maxNumZero = 0;
@@ -278,7 +278,7 @@ void partition_shapes(FILE *fSdf, int M, int N, int nnz, int* &csrRowIndexHostPt
                 for (int j = 0; j < sparse_nnz; j++) neg_format[i].csrCol[j] = 0;
 				
 				int n  = 0;
-				// 摘取剩余没有被标记的非零元
+				// pick unmarked non-zeros
 				for (int r = 0; r < M; r++) {
 					for (int j = csrRowIndexHostPtr[r]; j < csrRowIndexHostPtr[r+1]; j++) {
 						if ( fabs(csrValHostPtr[j]-FLT_MAX) > ZERO ) {
@@ -339,7 +339,7 @@ void partition_dia_shape(int M, int N, int nnz, int* &csrRowIndexHostPtr, int* &
 	int M_sub = neg_format_i.M_sub, N_sub = neg_format_i.N_sub;
 
 	int width;
-	// 粗略估计对角块的宽度
+	// set the width of diagonal strip
 	int smaller_dim = (M_sub > N_sub)? N_sub: M_sub;
 	if (smaller_dim>= 10000000)
 		width = smaller_dim * 0.000001;
@@ -352,7 +352,7 @@ void partition_dia_shape(int M, int N, int nnz, int* &csrRowIndexHostPtr, int* &
 	else 
 		width = smaller_dim * 0.1;
 
-	/* 按照公式求出来的width太小
+	/* this is the theoretical value in pure mathematics, which is too small for actual use
 	int width = h[i].a - sqrt(h[i].a*h[i].a-h[i].area1*gain) + 2;
 	int width = h[i].a - sqrt(h[i].a*h[i].a-h[i].area1*gain)+20 ;
 	*/
@@ -365,7 +365,7 @@ void partition_dia_shape(int M, int N, int nnz, int* &csrRowIndexHostPtr, int* &
 	neg_format_i.shape = 0; // 0 means diagonal
 	int num_diagonals = 2*width-1;
 	
-	int ** rowID_nonZero_each_dia = NULL; //存储每一个对角线中非零元的行索引
+	int ** rowID_nonZero_each_dia = NULL; // store the row index of non-zero for each diagonal
 	rowID_nonZero_each_dia = (int **) malloc(sizeof(int*)*num_diagonals);
 	memset(rowID_nonZero_each_dia, 0, sizeof(int*)*num_diagonals);
 	for (int k = 0; k < num_diagonals; k++)
@@ -382,7 +382,6 @@ void partition_dia_shape(int M, int N, int nnz, int* &csrRowIndexHostPtr, int* &
 	int n_diagonal = 0;
 	int diagonal_offset = hi.y - hi.x;
 	int r = 0, c = 0, nnz_shape = 0;
-	// 扫描非零元得到对角块 改用CSR格式
 	for (int i = 0; i < M; i++) {
 		for (int j = csrRowIndexHostPtr[i]; j < csrRowIndexHostPtr[i+1]; j++) {
 			r = i; c = csrColIndexHostPtr[j];
@@ -392,7 +391,6 @@ void partition_dia_shape(int M, int N, int nnz, int* &csrRowIndexHostPtr, int* &
 				&& c >= (new_r-width+1) && c <= (new_r+width-1) 
 				&& fabs(csrValHostPtr[j]-FLT_MAX)>ZERO ){
      //           printf("r=%d,c=%d\n", r, c);
-				// 该非零元在对角块内
 				rowID_nonZero_each_dia[n_diagonal][nnz_each_dia[n_diagonal]++] = r - hi.x;
 			}	
 		}// end for j
@@ -430,7 +428,7 @@ void partition_dia_shape(int M, int N, int nnz, int* &csrRowIndexHostPtr, int* &
 
     // for (int i = 0; i < neg; i++) printf("neg_offset[%d]=%d.\n", i, neg_offsets[i]);
 	neg_format_i.neg = neg;
-	//处理非零元密度大于阈值的对角线
+	// process diagonals with non-zero density greater than threshold
 	if (neg > 0) {
 		neg_format_i.neg_offsets = (int *)malloc(sizeof(int)*neg);
 		memcpy(neg_format_i.neg_offsets, neg_offsets, neg * sizeof(int));
@@ -439,12 +437,11 @@ void partition_dia_shape(int M, int N, int nnz, int* &csrRowIndexHostPtr, int* &
 		neg_format_i.end = (int*)malloc(sizeof(int)*neg);
 		memcpy(neg_format_i.end, end, neg * sizeof(int));
 
-		int maxNumZero=0; //存储单条稠密对角线中最大零元数
-		//存储每一条稠密对角线的零元个数
+		int maxNumZero=0; // record the maximal number of zeros in one dense diagonal
+		// store the number of zeros for each dense diagonal
 		neg_format_i.numZeroNeg = (int *)malloc(sizeof(int)*neg);
 		neg_format_i.cStart = (int *)malloc(sizeof(int)*neg);
 
-		// 获取稠密对角线的最大零元数量和每一条稠密对角线的零元数量
 		for(int d = 0; d < neg; d++)
 		{
 			n_diagonal = neg_format_i.neg_offsets[d] + width - 1;
@@ -460,7 +457,7 @@ void partition_dia_shape(int M, int N, int nnz, int* &csrRowIndexHostPtr, int* &
 		neg_format_i.nnz = nnz_shape; 
 		neg_format_i.maxNumZero = maxNumZero;
 
-		// rowZeroNeg 存放每条稠密对角线中每个零元的行索引
+		// rowZeroNeg record the row index of each zero 
 		neg_format_i.rowZeroNeg = (int **)malloc(sizeof(int*)*neg);
 		memset(neg_format_i.rowZeroNeg, 0, sizeof(int*)*neg);
 		if(maxNumZero > 0)
@@ -472,7 +469,6 @@ void partition_dia_shape(int M, int N, int nnz, int* &csrRowIndexHostPtr, int* &
 			}
 		}
 
-		//获取每条稠密对角线中每个零元的行索引
 		for(int d = 0; d < neg; d++)
 		{
 			int rNnzIndex = 0;
@@ -530,7 +526,7 @@ void partition_dia_shape(int M, int N, int nnz, int* &csrRowIndexHostPtr, int* &
     //         printf("%d ", neg_format_i.rowZeroNeg[i][j]);
     //     printf("\n");
     // }
-	// 标记包含在稠密对角块中的非零元
+	// mark non-zero within the dense diagonals
 	if (neg > 0)
 	{
 		nnz_shape = 0;
@@ -549,7 +545,7 @@ void partition_dia_shape(int M, int N, int nnz, int* &csrRowIndexHostPtr, int* &
 						if(c_sub - r_sub == neg_offsets[d])
 						{					
 							nnz_shape++;
-							csrValHostPtr[j] = FLT_MAX;//把采摘完的非零元做个标记
+							csrValHostPtr[j] = FLT_MAX;// mark the partitioned non-zeros
 						}
 					}
 				}
@@ -1110,8 +1106,8 @@ void spmv_stream_gpu(int M, int N, TaiChi *neg_format, int num_shapes, float *xH
 		cudaDeviceSynchronize();
 
 		cudaEventRecord(stop, 0); //end timing
-		cudaEventSynchronize(stop);    //Waits for an event to complete.Record之前的任务
-		cudaEventElapsedTime(&time_gather, start, stop);    //计算时间差
+		cudaEventSynchronize(stop);   
+		cudaEventElapsedTime(&time_gather, start, stop);    
 		time_gather /= NUM_RUN;
         checkcuda(cudaMemcpy(yHostPtr, y_device, M * sizeof(float), cudaMemcpyDeviceToHost));
 	}
